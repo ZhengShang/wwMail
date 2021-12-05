@@ -3,8 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.0"
-    id("org.jetbrains.compose") version "1.1.0-beta04"
+    kotlin("jvm") version "1.5.21"
+    id("org.jetbrains.compose") version "1.0.0-alpha3"
 }
 
 group = "me.shang"
@@ -19,6 +19,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("javax.mail:mail:1.4.7")
+    implementation("androidx.datastore:datastore-core:1.0.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -29,7 +30,8 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Msi)
+            outputBaseDir.set(project.buildDir.resolve("customOutputDir"))
             packageName = "wwMail"
             packageVersion = "1.0.0"
         }
