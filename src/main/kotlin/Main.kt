@@ -1,4 +1,6 @@
 // Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.desktop.DesktopMaterialTheme
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.VerticalScrollbar
@@ -18,10 +20,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 
 private lateinit var openSetting: () -> Unit
 
+@OptIn(ExperimentalAnimationApi::class, DelicateCoroutinesApi::class)
 @Composable
 @Preview
 fun App(window: ComposeWindow) {
@@ -54,7 +60,9 @@ fun App(window: ComposeWindow) {
                         enabled = subject.isNotBlank() && receivers.isNotBlank() && contents.isNotBlank(),
                         onClick = {
                             sendResult = "发送中..."
-                            sendResult = SendTask.send(subject, receivers, contents, attachmentFile)
+                            GlobalScope.launch {
+                                sendResult = SendTask.send(subject, receivers, contents, attachmentFile)
+                            }
                         }) {
                         Text("Send~")
                     }
@@ -80,12 +88,16 @@ fun App(window: ComposeWindow) {
                     )
                     Column(modifier = Modifier.padding(top = 12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("附件: \t$attachmentPath")
-                            Button(onClick = {
-                                attachmentFile = null
-                                attachmentPath = ""
-                            }, modifier = Modifier.padding(start = 8.dp)) {
-                                Text("删除")
+                            Text("附件:  $attachmentPath")
+                            AnimatedVisibility(
+                                visible = attachmentFile != null
+                            ) {
+                                OutlinedButton(onClick = {
+                                    attachmentFile = null
+                                    attachmentPath = ""
+                                }, modifier = Modifier.padding(start = 8.dp)) {
+                                    Text("删除")
+                                }
                             }
                         }
                         OutlinedButton(onClick = {
@@ -112,7 +124,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         icon = painterResource("app_icon.ico"),
         title = "WeiWeiMail",
-        state = WindowState(position = WindowPosition.Aligned(Alignment.Center))
+        state = WindowState(position = WindowPosition.Aligned(Alignment.Center), size = WindowSize(900.dp, 700.dp))
     ) {
         MenuBar {
             Menu("设置", mnemonic = 'S') {

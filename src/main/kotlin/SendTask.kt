@@ -9,7 +9,7 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 
 object SendTask {
-    fun send(subject: String, receivers: String, contents: String, attachmentFile: File?): String {
+    suspend fun send(subject: String, receivers: String, contents: String, attachmentFile: File?): String {
 
 //        val receiverList = receivers.split("\\r?\\n")
 
@@ -23,11 +23,12 @@ object SendTask {
             putIfAbsent("mail.smtp.starttls.enable", "false")
         }
 
+        AccountInfo.loadAccountInfo()
         val sender = AccountInfo.mailName
         val password = AccountInfo.mailPw
 
-        if (sender.isNotBlank() || password.isNotBlank()) {
-            return "邮箱账号或者密码每天, 请点击菜单中的[设置]进行填写"
+        if (sender.isBlank() || password.isBlank()) {
+            return "邮箱账号或者密码没填, 请点击菜单中的[设置]进行填写"
         }
 
         val session = Session.getDefaultInstance(props, object : javax.mail.Authenticator() {
@@ -38,12 +39,12 @@ object SendTask {
 
         session.debug = true
 
-        val bodyPart = MimeBodyPart().apply {
-            setText(contents)
+        val contentPart = MimeBodyPart().apply {
+            setText(contents, Charsets.UTF_8.toString(),"html")
         }
 
         val multipart = MimeMultipart().apply {
-            addBodyPart(bodyPart)
+            addBodyPart(contentPart)
             if (attachmentFile != null) {
                 val attachBody = MimeBodyPart()
                 attachBody.attachFile(attachmentFile)
@@ -61,7 +62,7 @@ object SendTask {
                         setRecipients(Message.RecipientType.TO, InternetAddress.parse(address, false))
                         setRecipients(Message.RecipientType.BCC, InternetAddress.parse(sender, false))
                         //attachment
-                        setContent(multipart, "text/html; charset=utf-8")
+                        setContent(multipart)
 
                         this.subject = subject
                         sentDate = Date()

@@ -15,16 +15,16 @@ object AccountInfo {
                 load(input)
             }
         }
-        properties.getProperty(EMAIL_NAME)?.let {
-            mailName = String(Base64.getDecoder().decode(it.trim()))
+        mailName = properties.getProperty(EMAIL_NAME) ?: ""
+        properties.getProperty(EMAIL_PW)?.let {
+            mailPw = String(Base64.getDecoder().decode(it.trim()))
         }
-        mailPw = properties.getProperty(EMAIL_PW) ?: ""
     }
 
     fun saveAccountInfo(mailName: String, mailPw: String) {
         val properties = Properties()
-        properties[EMAIL_NAME] = Base64.getEncoder().encodeToString(mailName.trim().toByteArray())
-        properties[EMAIL_PW] = mailPw
+        properties[EMAIL_NAME] = mailName
+        properties[EMAIL_PW] = Base64.getEncoder().encodeToString(mailPw.trim().toByteArray())
         file.outputStream().buffered().use { output ->
             properties.store(output, null)
         }
