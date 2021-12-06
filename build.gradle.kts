@@ -19,7 +19,6 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("javax.mail:mail:1.4.7")
-    implementation("androidx.datastore:datastore-core:1.0.0")
 }
 
 tasks.withType<KotlinCompile> {
