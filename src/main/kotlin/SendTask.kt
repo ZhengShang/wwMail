@@ -9,12 +9,15 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 
 object SendTask {
-    suspend fun send(subject: String, receivers: String, contents: String, attachmentFile: File?): String {
+    fun send(subject: String, receivers: String, contents: String, attachmentFile: File?): String {
 
-//        val receiverList = receivers.split("\\r?\\n")
-
-        //分号分隔
-        val receiverList = receivers.split(";")
+        val receiverList = if (receivers.contains(";")) {
+            //分号分隔
+            receivers.split(";")
+        } else {
+            //行号
+            receivers.split("\\r?\\n")
+        }
 
         val props = Properties().apply {
             putIfAbsent("mail.smtp.host", "smtp.qq.com")
@@ -40,7 +43,7 @@ object SendTask {
         session.debug = true
 
         val contentPart = MimeBodyPart().apply {
-            setText(contents, Charsets.UTF_8.toString(),"html")
+            setText(contents, Charsets.UTF_8.toString(), "html")
         }
 
         val multipart = MimeMultipart().apply {

@@ -76,7 +76,7 @@ fun App(window: ComposeWindow) {
                     OutlinedTextField(
                         value = receivers,
                         label = { Text("收件人") },
-                        placeholder = { Text("批量复制黏贴收件人, 分号分隔多个收件人.") },
+                        placeholder = { Text("批量复制黏贴收件人, 用换行分隔或者分号分隔多个收件人.") },
                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                         onValueChange = { receivers = it }
                     )
